@@ -1,0 +1,9 @@
+= Using MASON from Scala
+
+I go to school at {George Mason University}[http://www.gmu.edu] for {computational social sciences}[http://www.css.gmu.edu/] (CSS). GMU produces a library called MASON[http://cs.gmu.edu/~eclab/projects/mason/]. (The ancroynm, M.A.S.O.N., feels like a retronym. Obstensibly, it stands for Multi-Agent Simulator of Neighbors, but even the manuals seem to think it is a bit silly. I find it frustrating because it's not exactly search engine friendly.) MASON is a toolkit for {agent-based modeling}[http://en.wikipedia.org/wiki/Agent-based_model] built in Java[http://www.oracle.com/technetwork/java/index.html]. 
+
+The JVM is awesome; Java, the language, is beyond frustrating. I think it's too noisy and constraining. (Although, I will admit that the constraining aspect is a feature in many cases.) For agent-based modeling, it's particularly frustrating because such programming is exploratory and Java does not favor exploratory programming. There is a reason Java developers love UML -- you can't sketch code in Java like you can in LISP or Ruby...or Scala.
+
+Scala[http://www.scala-lang.org/] is a very consise and expressive language that compiles to the JVM. To me, it feels like Ruby except it is faster and easier to refactor. I tried porting SugarScape[http://www.sugarscape.com/] to Scala to show off why it would be a better language for ABM, but it required that I create too many things that MASON already does, so I couldn't finish. Now, I am porting MASON examples to Scala, learning MASON, and trying to figure out how to write a thin wrapper in Scala. Eventually, I'll port SugarScape.
+
+I favor readability and expressiveness, whereas MASON favors speed; theres a bit of an impedence mismatch going on here...

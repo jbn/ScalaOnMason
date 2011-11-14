@@ -1,0 +1,12 @@
+target/
+lib/
+lib_managed/
+src_managed/
+project/boot/
+scratch/
+paper/
+Chapter*
+manual_notes/*
+Students.scala
+Pimps.scala
+*.checkpoint
