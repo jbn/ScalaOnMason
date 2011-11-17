@@ -16,9 +16,8 @@ import sim.field.grid.ObjectGrid2D
 import sim.portrayal.grid.ObjectGridPortrayal2D
 import sim.portrayal.simple.OvalPortrayal2D
 import sim.util.Int2D
-import util.PBM
 
-import com.pathdependent.mason.ext.BallooningPortrayal
+import com.pathdependent.mason.ext.{BallooningPortrayal, PBM}
 import com.pathdependent.mason.ext.Helpers.makeSteppable
 
 /**

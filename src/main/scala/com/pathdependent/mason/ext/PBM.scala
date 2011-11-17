@@ -1,4 +1,4 @@
-package com.pathdependent.sugarscape.util
+package com.pathdependent.mason.ext
 
 import scala.util.parsing.combinator._
 
