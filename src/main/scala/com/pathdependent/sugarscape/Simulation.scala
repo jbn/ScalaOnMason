@@ -102,22 +102,24 @@ abstract class Sugarscape(randomSeed: Long) extends SimState(randomSeed) {
     
     agents = new ObjectGrid2D(width, height)
     
-    val initialNumberOfAgents = (initialAgentDensity * width * height).toInt
+    allLocations.
+      take((initialAgentDensity * width * height).toInt).
+      foreach(spawnAgent)
+  }
+  
+  def spawnAgent(location: Int2D): AT = {
+    val agent = generateAgent()
     
-    for(
-      i <- 0 until initialNumberOfAgents;  
-        location = allLocations(i);
-        agent = generateAgent()
-    ) {
-      agents.set(location.x, location.y, agent)
-      agent.location = location
-      livingAgents += agent
+    agents.set(location.x, location.y, agent)
+    agent.location = location
+    livingAgents += agent
 
-      // Agents start at time 1. Agent's must reschedule themselves each
-      // step assuming they are alive. Alternatively, I may want to investigate
-      // using a stoppable...
-      schedule.scheduleOnce(agent, Sugarscape.Ordering.AgentActivation)
-    }
+    // Agents start at time 1. Agent's must reschedule themselves each
+    // step assuming they are alive. Alternatively, I may want to investigate
+    // using a stoppable...
+    schedule.scheduleOnce(agent, Sugarscape.Ordering.AgentActivation)
+    
+    agent
   }
   
   /**

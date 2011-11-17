@@ -34,15 +34,7 @@ trait ImmediateReplacement extends Sugarscape {
     // Don't spawn if a location is unavailable. 
     allLocations.
       find { !isOccupied(_) }. // Find unoccupied location.
-      foreach { unoccupiedLocation => 
-        val spawnedAgent = generateAgent()
-        spawnedAgent.location = unoccupiedLocation
-        agents.set(unoccupiedLocation.x,unoccupiedLocation.y, spawnedAgent)
-        spawnedAgent
-
-        // XXX: It bothers me that this is duplicated.
-        schedule.scheduleOnce(spawnedAgent, Sugarscape.Ordering.AgentActivation)
-     }
+      foreach(spawnAgent)
   }
 }
 
@@ -78,18 +70,11 @@ trait DeferredReplacement extends Sugarscape {
         sugarscape => 
           sugarscape.randomizeAllLocations()
           allLocations.
-            filterNot{ isOccupied(_) }.
+            filterNot(isOccupied).
             take(agentsNeedingReplacement).
-            foreach { unoccupiedLocation => 
-              val spawnedAgent = generateAgent()
-              spawnedAgent.location = unoccupiedLocation
-              agents.set(unoccupiedLocation.x,unoccupiedLocation.y, spawnedAgent)
-              spawnedAgent
-
-              // XXX: It bothers me that this is duplicated.
-              schedule.scheduleOnce(spawnedAgent, Sugarscape.Ordering.AgentActivation)
-            }
-        agentsNeedingReplacement = 0
+            foreach(spawnAgent)
+            
+          agentsNeedingReplacement = 0
       }
     )
     
