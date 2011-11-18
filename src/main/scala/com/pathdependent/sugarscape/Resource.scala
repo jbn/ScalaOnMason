@@ -45,6 +45,8 @@ class Resource(
    * Allows a resource to growback at different (albeit constant) rates 
    * based on the "season." 
    *
+   * Epstein and Axtell used 1/8 and 1 for winter and summer, respectively.
+   *
    * @see Growing Artificial Societies, p.44.
    */
   def simpleSeasonalGrowback(

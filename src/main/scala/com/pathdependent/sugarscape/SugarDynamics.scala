@@ -37,6 +37,11 @@ trait SugarConsumption extends Agent {
   
   /**
    * An agent begins life with an endowment of sugar. 
+   *
+   * As best as I can tell, Epstein and Axtell used an default endowement of 
+   * 5 to 25, inclusive.
+   *
+   * @see Growing Artificial Societies, p.33.
    */
   val sugarEndowment: Double
   
