@@ -50,8 +50,8 @@ class AnimationII3Sim(seed: Long)
     )
   }
   
-  override def sugarGrowbackRule(location: Int2D, resource: Resource): Double ={
-    Resource.CapacityGrowback(resource)
+  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
+    resource.unitGrowback()
   }
   
   override def toString = AnimationII3WithUI.getName()

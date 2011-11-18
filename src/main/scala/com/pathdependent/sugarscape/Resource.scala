@@ -11,42 +11,59 @@ package com.pathdependent.sugarscape
 
 import scala.reflect.BeanProperty
 
-object Resource {
-  type GrowbackRule = (Resource) => Double
-  
-  def CapacityLimited(resource: Resource, growback: GrowbackRule): Double = {
-    resource.capacity min growback(resource)
-  }
-  
-  /** The default next level of GAS assumes unit growback. */
-  val UnitGrowback: GrowbackRule = (resource) => resource.level + 1 
-  
-  /** The resource will grow back to its full capacity on every step. */
-  val CapacityGrowback: GrowbackRule = (resource) => resource.capacity
+/**
+ * A resource is something that agents want to collect (e.g. sugar, spice.)
+ */
+class Resource(
+  @BeanProperty var level: Double, 
+  @BeanProperty var capacity: Double
+) extends Serializable {
 
-  /** The resource will grow back growbackRate units per step. */   
-  def makeConstantGrowbackRule(growbackRate: Double): GrowbackRule = {
-    (resource: Resource) => resource.level + growbackRate
+  /** Grow back one unit per step. */
+  def unitGrowback() { level = (level + 1.0) min capacity }
+  
+  /** Growback delta units per step. */   
+  def constantGrowback(delta: Double) {
+    level = (level + delta) min capacity
   }
+  
+  /** Immediately growback to full capacity. */
+  def capacityGrowback() { level = capacity }
   
   /**
    * The resource will grow back at the current level * (1 + growbackRate). 
    * Since an exhausted resource will be 0, there must be a level following
    * exhaustion that is constant. That is reflected in refractoryLevel.
    */ 
-  def makeExponentialGrowback(refractoryLevel: Double, 
-                              growbackRate: Double): GrowbackRule = {
-    (resource: Resource) => { 
-      if(resource.level == 0){
-        refractoryLevel
-      }else{
-        (resource.level * (1.0 + growbackRate))
+  def exponentialGrowback(refractoryLevel: Double, growbackRate: Double) {
+    level = 
+      if(level == 0) refractoryLevel 
+      else (level * (1.0 + growbackRate)) min capacity
+  }
+  
+  /**
+   * Allows a resource to growback at different (albeit constant) rates 
+   * based on the "season." 
+   *
+   * @see Growing Artificial Societies, p.44.
+   */
+  def simpleSeasonalGrowback(
+    isNorth: Boolean,
+    timeInSteps: Long,
+    durationOfSeasonInSteps: Long,
+    summerGrowbackRate: Double,
+    winterGrowbackRate: Double
+  ) {
+    val firstSeason = timeInSteps % 
+      (2.0 * durationOfSeasonInSteps) / durationOfSeasonInSteps < 1
+      
+    val growbackRate = 
+      if(isNorth) { 
+        if(firstSeason) summerGrowbackRate else winterGrowbackRate
+      } else {
+        if(firstSeason) winterGrowbackRate else summerGrowbackRate
       }
-    } 
+      
+    constantGrowback(growbackRate)
   }
 }
-
-class Resource(
-  @BeanProperty var level: Double, 
-  @BeanProperty var capacity: Double
-) extends Serializable

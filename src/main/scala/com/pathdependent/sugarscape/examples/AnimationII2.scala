@@ -21,8 +21,8 @@ class AnimationII2Sim(seed: Long) extends AnimationII1Sim(seed) {
    *
    * @todo make AnimationII1 extend AnimationII2...which is weird.
    */
-  override def sugarGrowbackRule(location: Int2D, resource: Resource): Double ={
-    Resource.CapacityLimited(resource, Resource.UnitGrowback)
+  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
+    resource.unitGrowback()
   }
 }
 

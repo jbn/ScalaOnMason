@@ -217,7 +217,7 @@ trait SugarResources extends Sugarscape {
     allLocations.foreach { 
       location =>
         val resource = sugarAt(location)
-        resource.level = sugarGrowbackRule(location, resource)
+        sugarGrowbackRule(location, resource)
     }
   }
   
@@ -226,11 +226,16 @@ trait SugarResources extends Sugarscape {
    *
    * The default is for unit growback, which is rule G∞.
    *
+   * @param location has been included for future extensions. Right now, 
+   *        sugar updates by isolated CA rules; however, alternative rules
+   *        are possible, and would require the resources location.
+   *        I don't like storing the location in a resource though.
+   *
    * @see Growing Artifical Societies, p.26.
    */
   protected 
-  def sugarGrowbackRule(location: Int2D, resource: Resource): Double = {
-    Resource.CapacityLimited(resource, Resource.UnitGrowback)
+  def sugarGrowbackRule(location: Int2D, resource: Resource) {
+    resource.unitGrowback()
   }
   
   /**
@@ -294,21 +299,19 @@ trait SeasonalSugar extends SugarResources {
    * The duration of each season in steps.
    */
   var durationOfSugarSeason: Int
-  var sugarSummerGrowbackRule: Resource.GrowbackRule
-  var sugarWinterGrowbackRule: Resource.GrowbackRule
   
-  override def sugarGrowbackRule(location: Int2D, resource: Resource): Double ={
-    val firstSeason = schedule.getSteps % 
-      (2 * durationOfSugarSeason) / durationOfSugarSeason < 1
-      
-    val growbackRule = 
-      if(location.y < height / 2) { 
-        if(firstSeason) sugarSummerGrowbackRule else sugarWinterGrowbackRule
-      } else {
-        if(firstSeason) sugarWinterGrowbackRule else sugarSummerGrowbackRule
-      }
-      
-    Resource.CapacityLimited(resource, growbackRule)
+  var winterSugarGrowbackRate: Double
+  
+  var summerSugarGrowbackRate: Double
+  
+  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
+    resource.simpleSeasonalGrowback(
+      isNorth = location.y < height / 2,
+      timeInSteps = schedule.getSteps(),
+      durationOfSeasonInSteps = durationOfSugarSeason,
+      summerGrowbackRate = summerSugarGrowbackRate,
+      winterGrowbackRate = winterSugarGrowbackRate
+    )
   }
 }
 

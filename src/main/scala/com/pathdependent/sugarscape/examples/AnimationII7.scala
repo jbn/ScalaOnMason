@@ -9,28 +9,32 @@
 */
 package com.pathdependent.sugarscape.examples
 
+import scala.reflect.BeanProperty
+
 import com.pathdependent.sugarscape._
 import sim.engine.SimState
-import sim.util.Int2D
+import sim.util.{Int2D, Interval}
 
 class AnimationII7(seed: Long) 
   extends AnimationII1Sim(seed) with SeasonalSugar {
   
   def this() = this(System.currentTimeMillis())
   
-  var durationOfSugarSeason = 50
-  var sugarWinterGrowbackRule = Resource.makeConstantGrowbackRule(1.0 / 8.0)
-  var sugarSummerGrowbackRule = Resource.makeConstantGrowbackRule(1.0)
+  @BeanProperty var durationOfSugarSeason = 50
+  @BeanProperty var winterSugarGrowbackRate = 1.0 / 8.0
+  def domWinterSugarGrowbackRate() = new Interval(0.0, 1.0)
+  @BeanProperty var summerSugarGrowbackRate = 1.0
+  def domSummerSugarGrowbackRate() = new Interval(0.0, 1.0)
 }
 
-class AnimationII2WithSeasonsWithUI(rawState: SimState) 
+class AnimationII7WithUI(rawState: SimState) 
     extends AnimationII1WithUI(rawState){
   def this() = this(new AnimationII7(System.currentTimeMillis))
 }
 
-object AnimationII2WithSeasonsWithUI {
+object AnimationII7WithUI {
   def main(args: Array[String]) {
-    (new AnimationII2WithSeasonsWithUI()).createController() 
+    (new AnimationII7WithUI()).createController() 
   }
     
   def getName(): String = "SugarScape in Scala on Mason"
