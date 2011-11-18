@@ -1,11 +1,25 @@
 <html lang="en">
 <head>
 	<title>{{ page.title }}</title>
+	<link href="http://fonts.googleapis.com/css?family=Lancelot" rel="stylesheet" type="text/css">
+	<style>
+	body{font-family: 'Lancelot', Arial, Verdana, Tahoma, sans-sherif;text-align:center;}
+	article,section,header,footer,nav{display:block}
+	article, footer{margin:0 auto;text-align:left;width:750px}
+	</style>
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
 </head>
 <body>
+<article>
 	<h1>Scala on MASON</h1>
 	<p>
 		{{ content }}
 	</p>
+</article>
+<footer>
+	&copy; Copyright John Bjorn Nelson, 2011
+</footer>
 </body>
 </html>
