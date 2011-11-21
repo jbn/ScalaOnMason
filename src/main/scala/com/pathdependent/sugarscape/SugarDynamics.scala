@@ -60,13 +60,18 @@ trait SugarConsumption extends Agent {
    */
   def sugarMetabolicRate(): Double = basalSugarMetabolism
   
+  
   /**
    * Burns through accumulated sugar.
    * 
    * Override method method if you want to affect what happens when sugar is
    * metabolized. For example, produce pollution on metabolism.
    */
-  def metabolizeSugar() { accumulatedSugar -= sugarMetabolicRate() }
+  def metabolizeSugar(): Double = { 
+    val amount = sugarMetabolicRate() 
+    accumulatedSugar -= amount
+    amount
+  }
   
   /**
    * An agent is dead if it's sugar demands are not fullfilled -- it starves.
@@ -88,7 +93,7 @@ trait SugarConsumption extends Agent {
    *   <li>Look out as far as vision permits in the four principal lattice
    *       directions and identify the unoccupied site(s) having the most
    *       sugar;</li>
-   *   <li>If the greatest sugar value appears on multiple sites than select
+   *   <li>If the greatest sugar value appears on multiple sites then select
    *       the nearest one;</li>
    *   <li>Move to this site;</li>
    *   <li>Collect all the sugar at this new position</li>
@@ -150,10 +155,10 @@ trait SugarConsumption extends Agent {
   /** 
    * Adds sugar metabolism to the autonomic chain.
    */
-  override def updateAutonomicState() { 
+  override def updateAutonomicState(sugarscape: ET) { 
     metabolizeSugar()
     
-    super.updateAutonomicState()
+    super.updateAutonomicState(sugarscape)
   }
 }
 
@@ -351,6 +356,8 @@ trait SugarPortrayal extends SugarscapeWithUI {
    * Attaches the sugarPortrayal.
    */
   override def setupDisplay(display: sim.display.Display2D) {
+    super.setupDisplay(display)
+    
     display.attach(sugarPortrayal, "The Sugar")
   }
 }

@@ -19,6 +19,8 @@ import ec.util.MersenneTwisterFast
 import com.pathdependent.mason.ext.Helpers.shuffle
 
 abstract class Agent extends Steppable {
+  type AT <: Agent
+  
   /**
    * The type of environment this agent interacts with and within. By defining
    * an abstract type, different traits can specify their requirements in the
@@ -94,7 +96,7 @@ abstract class Agent extends Steppable {
    * @note This might not work out, since it makes reordering updates
    *       difficult...
    */
-  def updateAutonomicState() { }
+  def updateAutonomicState(sugarscape: ET) { }
   
   /**
    * Chained hook for any type of interaction. Interactions take place after 
@@ -119,7 +121,7 @@ abstract class Agent extends Steppable {
   def step(uglyGenericState: SimState){
     val sugarscape = uglyGenericState.asInstanceOf[ET]
     
-    updateAutonomicState()
+    updateAutonomicState(sugarscape)
     
     identifyBestLocation(sugarscape).foreach{ 
       sugarscape.moveAgent(location, _) 

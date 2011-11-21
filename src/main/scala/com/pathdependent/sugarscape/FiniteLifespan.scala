@@ -56,9 +56,9 @@ trait FiniteLifespan extends Agent {
   /** 
    * Adds aging autonomic chain.
    */
-  override def updateAutonomicState() { 
+  override def updateAutonomicState(sugarscape: ET) { 
     growOlder()
     
-    super.updateAutonomicState()
+    super.updateAutonomicState(sugarscape)
   }
 }

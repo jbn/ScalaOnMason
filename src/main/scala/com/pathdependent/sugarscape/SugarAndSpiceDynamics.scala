@@ -9,17 +9,4 @@
 */
 package com.pathdependent.sugarscape
 
-/**
- * Embues an agent with a sex.
- */
-trait DifferentiatedSexes extends Agent {
-  val sex: Sex
-}
-
-sealed abstract class Sex{
-  def isMale(): Boolean
-  def isFemale() = !isMale()
-}
-case object Male extends Sex{ def isMale() = true }
-case object Female extends Sex{ def isMale() = false }
 
