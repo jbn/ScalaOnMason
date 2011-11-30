@@ -113,16 +113,19 @@ abstract class Sugarscape(randomSeed: Long) extends SimState(randomSeed) {
   def spawnAgent(location: Int2D): AT = {
     val agent = generateAgent()
     
-    agents.set(location.x, location.y, agent)
-    agent.location = location
+    insertAgent(location, agent)
+    
+    agent
+  }
+  
+  def insertAgent(location: Int2D, agent: AT) {
+    placeAgentAt(location, agent)
     livingAgents += agent
 
     // Agents start at time 1. Agent's must reschedule themselves each
     // step assuming they are alive. Alternatively, I may want to investigate
     // using a stoppable...
     schedule.scheduleOnce(agent, Sugarscape.Ordering.AgentActivation)
-    
-    agent
   }
   
   /**
@@ -139,15 +142,17 @@ abstract class Sugarscape(randomSeed: Long) extends SimState(randomSeed) {
    * @param to is the target location
    */
   def moveAgent(from: Int2D, to: Int2D) {
-    require(agentAt(to) == null, "Can't move an agent that does not exist.")
-    
-    val agent = agentAt(from)
+    placeAgentAt(to, agentAt(from))
 
     agents.set(from.x, from.y, null) // Remove old location
-    agents.set(to.x, to.y, agent)    // Move to new location
-    agent.location = to              // Update the agent's ugly location cache
   }
   
+  def placeAgentAt(location: Int2D, agent: AT) {
+    require(!isOccupied(location), "Can't move agent ontop of other agents")
+    
+    agents.set(location.x, location.y, agent)
+    agent.location = location
+  }
  
   /**
    * The mean vision of all living agents. 

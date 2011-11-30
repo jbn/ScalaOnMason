@@ -139,6 +139,16 @@ abstract class Agent extends Steppable {
     }
   }
 
+  def immediateNeighborhood(rng: MersenneTwisterFast): List[Int2D] = {
+    val neighborhood = mutable.ListBuffer.empty[Int2D]
+
+    neighborhood += new Int2D(location.x, location.y - 1) // North
+    neighborhood += new Int2D(location.x + 1, location.y) // East
+    neighborhood += new Int2D(location.x, location.y + 1) // South
+    neighborhood += new Int2D(location.x - 1, location.y) // West
+
+    shuffle(neighborhood, rng).toList
+  }
   
   /**
    * @return randomly ordered list of locations with this agents vision

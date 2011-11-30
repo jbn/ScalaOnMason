@@ -11,10 +11,3 @@ package com.pathdependent.sugarscape
 
 import scala.collection.mutable
 
-trait Reproduction extends Agent {
-
-}
-
-trait MonogomousPairBonding extends Reproduction {
-  
-}

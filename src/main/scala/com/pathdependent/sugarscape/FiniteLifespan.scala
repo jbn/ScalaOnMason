@@ -38,14 +38,14 @@ trait FiniteLifespan extends Agent {
    * attribute to inspect statistically. It could potentially be used to make
    * obvious some artifacts that would otherwise be unapparent.
    */
-  var initialAge: Int
+  val initialAge: Int
   
   @BeanProperty var age: Int = initialAge
   
   /** 
    * The age at which this agent will die from "natural causes."
    */ 
-  var ageOfExpiration: Int
+  val ageOfExpiration: Int
   
   def growOlder(): Unit = age += 1 
   

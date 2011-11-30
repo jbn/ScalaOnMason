@@ -20,8 +20,8 @@ class AnimationII3Agent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
   @BeanProperty val sugarEndowment: Double,
-  @BeanProperty var initialAge: Int,
-  @BeanProperty var ageOfExpiration: Int
+  @BeanProperty val initialAge: Int,
+  @BeanProperty val ageOfExpiration: Int
 ) extends Agent
     with SugarConsumption 
       with MovementRuleM 
