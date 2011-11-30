@@ -37,7 +37,7 @@ class Resource(
    */ 
   def exponentialGrowback(refractoryLevel: Double, growbackRate: Double) {
     level = 
-      if(level == 0) refractoryLevel 
+      if(level == 0) refractoryLevel min capacity
       else (level * (1.0 + growbackRate)) min capacity
   }
   

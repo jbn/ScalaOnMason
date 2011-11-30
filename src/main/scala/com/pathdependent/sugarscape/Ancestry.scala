@@ -35,12 +35,4 @@ trait Ancestry extends Agent with DifferentiatedSexes {
   def getNumberOfChildren() = children.length
 }
 
-trait Reproduction extends Agent {
-  def isFertile(): Boolean
-}
-
-trait GroupIdentity extends Agent {
-  def getGroupIdentity: Int
-}
-
 

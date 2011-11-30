@@ -279,6 +279,14 @@ trait SugarResources extends Sugarscape {
   }
 }
 
+trait SugarResourcesDistribution extends SugarResources {
+  type AT <: SugarConsumption
+  
+  def getAccumulatedSugarDistribution(): Array[Double] = {
+    livingAgents.map(_.accumulatedSugar).toArray
+  }
+}
+
 /**
  * Implements the ubiqutious Two Sugar Mountains, as illustrated by 
  * Growing Artificial Societies. 
@@ -292,7 +300,9 @@ trait TwoSugarMountains extends SugarResources {
       "The TwoSugarMountain trait requires a width of 50 and height of 50."
     )
     
-    val capacities = PBM.parse(getClass.getResource("/TwoSugarMountains.pbm"))
+    val capacities = PBM.parse(
+      getClass.getResource("/sugarscape/TwoSugarMountains.pbm")
+    )
     for(x <- 0 until width; y <- 0 until height; level = capacities(x, y)){
       sugar.set(x, y, new Resource(level = level, capacity = level))
     }

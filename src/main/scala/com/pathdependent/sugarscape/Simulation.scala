@@ -102,9 +102,12 @@ abstract class Sugarscape(randomSeed: Long) extends SimState(randomSeed) {
     
     agents = new ObjectGrid2D(width, height)
     
-    allLocations.
-      take((initialAgentDensity * width * height).toInt).
-      foreach(spawnAgent)
+    
+    generateInitialAgentLocations.foreach(spawnAgent)
+  }
+  
+  def generateInitialAgentLocations(): List[Int2D] = {
+    allLocations.take((initialAgentDensity * width * height).toInt)
   }
   
   def spawnAgent(location: Int2D): AT = {

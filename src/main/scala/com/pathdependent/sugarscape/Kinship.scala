@@ -11,6 +11,7 @@ package com.pathdependent.sugarscape
 
 import scala.collection.mutable.HashSet
 
+/*
 trait Kinship extends Agent {
   var kinshipGrammar: KinshipGrammar
 }
@@ -50,4 +51,4 @@ class DegreesOfSeperationKinship(val k: Int) extends KinshipGrammar {
     
     knownKin
   }
-}
+}*/

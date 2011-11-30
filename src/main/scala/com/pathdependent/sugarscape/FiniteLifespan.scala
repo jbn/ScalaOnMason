@@ -62,3 +62,11 @@ trait FiniteLifespan extends Agent {
     super.updateAutonomicState(sugarscape)
   }
 }
+
+trait AgeDistribution extends Sugarscape {
+  type AT <: FiniteLifespan
+  
+  def getAgeDistribution(): Array[Int] = {
+    livingAgents.map(_.age).toArray
+  }
+}

@@ -14,68 +14,71 @@ import com.pathdependent.sugarscape._
 import scala.reflect.{BeanProperty}
 
 import sim.engine.{SimState}
-import sim.util.Int2D
+import sim.util.{Int2D, Interval}
 
-class AnimationII3Agent(
+import com.pathdependent.mason.ext.PBM
+
+class AnimationII6Agent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
-  @BeanProperty val sugarEndowment: Double,
-  @BeanProperty var initialAge: Int,
-  @BeanProperty var ageOfExpiration: Int
+  @BeanProperty val sugarEndowment: Double
 ) extends Agent
     with SugarConsumption 
       with MovementRuleM 
-      with FiniteLifespan
   
-class AnimationII3Sim(seed: Long) 
+/**
+ * I was unable to replicate the observed BZWave unless I the sugar
+ * growback was severely retarded. I also think I probably need to turn off
+ * the terroidal landscape, but this gives you nice "waves" at least.
+ */
+class AnimationII6Sim(seed: Long) 
   extends Sugarscape(seed) 
-    with SugarResources with TwoSugarMountains
-    with DeferredReplacement 
-    with SugarResourcesDistribution
-    with AgeDistribution {
+    with SugarResources with TwoSugarMountains{
   def this() = this(System.currentTimeMillis())
     
-  type AT = AnimationII3Agent
-  
-  initialAgentDensity = 250.0 / (width * height)
+  type AT = AnimationII6Agent
   
   @BeanProperty var minDepthOfVision = 1
-  @BeanProperty var maxDepthOfVision = 6
-    
-  def generateAgent(): AnimationII3Agent = {
-    new AnimationII3Agent(
+  @BeanProperty var maxDepthOfVision = 10
+  
+  def generateAgent(): AnimationII6Agent = {
+    val basalSugarMetabolism = 1 + random.nextInt(6)
+    new AnimationII6Agent(
       depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
-      basalSugarMetabolism = 1 + random.nextInt(6),
-      sugarEndowment = 5 + random.nextInt(21),
-      initialAge = 0,
-      ageOfExpiration = 60 + random.nextInt(41)
+      basalSugarMetabolism = basalSugarMetabolism,
+      sugarEndowment = basalSugarMetabolism * 10
     )
   }
   
-  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
-    resource.unitGrowback()
+  override def generateInitialAgentLocations(): List[Int2D] = {
+    val initialLocations = PBM.parse(
+      getClass.getResource("/sugarscape/AgentWave.pbm")
+    )
+    
+    allLocations.filter { loc => initialLocations(loc.x, loc.y) == 1 }
   }
-
-  override def toString = AnimationII3WithUI.getName()
+  
+  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
+    resource.exponentialGrowback(0.1, 0.2)
+  }
+  
+  override def toString = AnimationII6WithUI.getName()
 }
   
-class AnimationII3WithUI(
+class AnimationII6WithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
     with SugarPortrayal {
-  def this() = this(new AnimationII3Sim(System.currentTimeMillis))
-  type ET = AnimationII3Sim
-  
+  def this() = this(new AnimationII6Sim(System.currentTimeMillis))
+  type ET = AnimationII6Sim
 }
   
-object AnimationII3WithUI {
+object AnimationII6WithUI {
   def main(args: Array[String]) {
-    (new AnimationII3WithUI()).createController() 
+    (new AnimationII6WithUI()).createController() 
   }
     
-  def getName(): String = "SugarScape AnimationII3"
-  
-  
+  def getName(): String = "SugarScape AnimationII6"
     
   def getInfo(): Object = (
     <html>

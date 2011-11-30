@@ -9,6 +9,7 @@
 */
 package com.pathdependent.sugarscape.examples
 
+/*
 import sim.util.Int2D
 import com.pathdependent.sugarscape._
 
@@ -28,4 +29,4 @@ object AncestryExperimentation{
     val eve = new ExerimentalAgent(1, Female)
   }
 }
-
+*/

@@ -20,11 +20,12 @@ class ScratchAgent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
   @BeanProperty val sugarEndowment: Double,
+  @BeanProperty val basalSpiceMetabolism: Double,
+  @BeanProperty val spiceEndowment: Double,
   @BeanProperty val sex: Sex
 ) extends Agent
-    with SugarConsumption 
-      with PollutionGeneratedByConsumptionOfSugar
-      with MovementRuleMModifiedForPollution
+    with SugarConsumption
+    with SpiceConsumption with MovementRuleM
     with DifferentiatedSexes
     with Ancestry {
   type ET = ScratchSim
@@ -34,9 +35,7 @@ class ScratchAgent(
 class ScratchSim(seed: Long) 
   extends Sugarscape(seed) 
     with SugarResources with TwoSugarMountains
-    with Pollution 
-      with PollutionDiffusion
-      with PollutionGeneratedByExtractionOfSugar {
+    with SpiceResources with TwoSpiceMountains {
   def this() = this(System.currentTimeMillis())
     
   type AT = ScratchAgent
@@ -48,10 +47,13 @@ class ScratchSim(seed: Long)
     
   def generateAgent(): ScratchAgent = {
     val basalSugarMetabolism = 1 + random.nextInt(6)
+    val basalSpiceMetabolism = 1 + random.nextInt(6)
     val agent = new ScratchAgent(
       depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
       basalSugarMetabolism = basalSugarMetabolism,
       sugarEndowment = basalSugarMetabolism,
+      basalSpiceMetabolism = basalSpiceMetabolism,
+      spiceEndowment = basalSpiceMetabolism,
       if(random.nextBoolean(0.5)) Male else Female
     )
     agent.mother = None
@@ -68,8 +70,7 @@ class ScratchSim(seed: Long)
 class ScratchWithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
-    with SugarPortrayal 
-    with PollutionPortrayal {
+    with SugarPortrayal {
   def this() = this(new ScratchSim(System.currentTimeMillis))
   type ET = ScratchSim
 }

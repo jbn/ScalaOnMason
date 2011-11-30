@@ -218,7 +218,9 @@ trait TwoSpiceMountains extends SpiceResources {
       "The TwoSpiceMountain trait requires a width of 50 and height of 50."
     )
     
-    val capacities = PBM.parse(getClass.getResource("/TwoSugarMountains.pbm"))
+    val capacities = PBM.parse(
+      getClass.getResource("/sugarscape/TwoSugarMountains.pbm")
+    )
     for(x <- 0 until width; y <- 0 until height; level = capacities(x, y)){
       // x,y => y,x to invert the mountaints
       spice.set(y, x, new Resource(level = level, capacity = level))
