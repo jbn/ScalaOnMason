@@ -222,8 +222,8 @@ trait TwoSpiceMountains extends SpiceResources {
       getClass.getResource("/sugarscape/TwoSugarMountains.pbm")
     )
     for(x <- 0 until width; y <- 0 until height; level = capacities(x, y)){
-      // x,y => y,x to invert the mountaints
-      spice.set(y, x, new Resource(level = level, capacity = level))
+      // Flip over the verticle axis
+      spice.set(width-1-x, y, new Resource(level = level, capacity = level))
     }
   }
 }

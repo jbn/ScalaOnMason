@@ -11,6 +11,10 @@ package com.pathdependent.sugarscape
 
 import scala.reflect.BeanProperty
 
+import ec.util.MersenneTwisterFast
+
+import com.pathdependent.mason.ext.PBM
+
 /**
  * A resource is something that agents want to collect (e.g. sugar, spice.)
  */
@@ -69,3 +73,4 @@ class Resource(
     constantGrowback(growbackRate)
   }
 }
+

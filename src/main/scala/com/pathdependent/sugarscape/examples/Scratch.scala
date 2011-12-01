@@ -60,17 +60,13 @@ class ScratchSim(seed: Long)
     agent
   }
   
-  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
-    resource.capacityGrowback()
-  }
-  
   override def toString = ScratchWithUI.getName()
 }
   
 class ScratchWithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
-    with SugarPortrayal {
+    with SugarAndSpicePortrayal {
   def this() = this(new ScratchSim(System.currentTimeMillis))
   type ET = ScratchSim
 }
