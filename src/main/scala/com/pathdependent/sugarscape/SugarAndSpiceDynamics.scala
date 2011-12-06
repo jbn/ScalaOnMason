@@ -10,8 +10,103 @@
 package com.pathdependent.sugarscape
 
 import java.awt.Color
+import sim.util.Int2D
 import sim.portrayal.grid.ObjectGridPortrayal2D
 import com.pathdependent.mason.ext.{BallooningSemiCirclePortrayal, PBM}
+
+import scala.math.pow
+
+trait SugarAndSpiceMountains extends SugarResources with SpiceResources {
+  def configureSugar() {
+    require(
+      width == 51 && height == 51,
+      "The TwoSugarMountain trait requires a width of 50 and height of 50."
+    )
+    
+    val capacities = PBM.parse(
+      getClass.getResource("/sugarscape/TwoResourceMountains.pbm")
+    )
+    for(x <- 0 until width; y <- 0 until height; level = capacities(x, y)){
+      sugar.set(x, y, new Resource(level = level, capacity = level))
+    }
+  }
+  
+  def configureSpice() {
+    require(
+      width == 51 && height == 51,
+      "The TwoSpiceMountain trait requires a width of 50 and height of 50."
+    )
+    
+    val capacities = PBM.parse(
+      getClass.getResource("/sugarscape/TwoResourceMountains.pbm")
+    )
+    for(x <- 0 until width; y <- 0 until height; level = capacities(x, y)){
+      // Flip over the verticle axis
+      spice.set(width-1-x, y, new Resource(level = level, capacity = level))
+    }
+  }
+}
+
+trait MultiCommodityMovementRule
+  extends SugarConsumption with SpiceConsumption {
+  type ET <: SugarResources with SpiceResources
+  /**
+   * @see Growing Artificial Socieites, p.97.
+   */
+  def welfare(sugarWealth: Double, spiceWealth: Double): Double = {
+    val mSugar = sugarMetabolicRate
+    val mSpice = spiceMetabolicRate
+    val mTotal = mSugar + mSpice
+    
+    pow(sugarWealth, mSugar / mTotal) * pow(spiceWealth, mSpice / mTotal)
+  }
+
+  def marginalRateOfSubstitution(sugarWealth: Double, spiceWealth: Double): Double = {
+    (spiceWealth / spiceMetabolicRate) / (sugarWealth / sugarMetabolicRate)
+  }
+  
+  /**
+   *
+   * @see Growing Artificial Societies, p.98-99.
+   */
+  def maximumWelfareLocation(sugarscape: ET): Option[Int2D] = { 
+    def welfareAt(position: Int2D): Double = {
+      welfare(
+        accumulatedSugar + sugarscape.sugarAt(position).level,
+        accumulatedSpice + sugarscape.spiceAt(position).level
+      )
+    }
+    val neighborhood = neighborhoodLocations(sugarscape.random) 
+    
+    val emptyOrderedPositions = neighborhood.
+      map { sugarscape.translateLocation(_) }. // clip or wrap coords.
+      filterNot { sugarscape.isOccupied(_) }.  // limit to unoccupied site(s)
+      sortWith {                               // sort by descending welfare
+        (a, b) => welfareAt(a) > welfareAt(b)
+      } 
+
+    if(emptyOrderedPositions.isEmpty) {
+      None
+    } else {
+      val maxWelfare = welfareAt(emptyOrderedPositions.head)
+      
+      // Limit to the positions with the maximum level of sugar.
+      val bestPositions = emptyOrderedPositions.filter {
+        welfareAt(_) > maxWelfare - 0.001 // Floating Point annoyances
+      }
+      
+      // Find nearest location.
+      val destination = bestPositions.sortWith {
+        (a,b) => a.manhattanDistance(location) < b.manhattanDistance(location)
+      }.head
+      
+      Some(destination)
+    }
+  }
+  
+  def identifyBestLocation(sugarscape: ET) = maximumWelfareLocation(sugarscape)  
+}
+
 
 /**
  * Implements the visualization of sugar as Balloooning portrayals.

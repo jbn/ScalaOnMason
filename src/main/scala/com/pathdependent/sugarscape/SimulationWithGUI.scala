@@ -15,8 +15,6 @@ import java.awt.{Color}
 import sim.engine.{SimState}
 import sim.display.{Display2D,GUIState,Controller}
 import sim.portrayal.Inspector
-import sim.portrayal.grid.{ObjectGridPortrayal2D}
-import sim.portrayal.simple.{OvalPortrayal2D}
 
 class SugarscapeWithUI(rawState: SimState) extends GUIState(rawState){
   type ST <: Sugarscape
@@ -24,7 +22,6 @@ class SugarscapeWithUI(rawState: SimState) extends GUIState(rawState){
   /** Show the Parameters object, not this. */
   override def getSimulationInspectedObject() = state
   
-  val agentsPortrayal = new ObjectGridPortrayal2D() 
   var display: Display2D = null
   var displayFrame: JFrame = null
   
@@ -47,11 +44,6 @@ class SugarscapeWithUI(rawState: SimState) extends GUIState(rawState){
   def setupPortrayals() {
     val sugarscape = state.asInstanceOf[ST]
     
-    agentsPortrayal.setPortrayalForNonNull(
-      new OvalPortrayal2D(Color.yellow, 0.2)
-    )
-    agentsPortrayal.setField(sugarscape.agents)
-  
     setupPortrayal(sugarscape)
   
     val width = sugarscape.width
@@ -98,7 +90,6 @@ class SugarscapeWithUI(rawState: SimState) extends GUIState(rawState){
     display.insideDisplay.setupHints(true, true, true)
     
     setupDisplay(display)
-    display.attach(agentsPortrayal, "The Agents")
   }
   
   

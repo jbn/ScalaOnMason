@@ -63,7 +63,8 @@ class AnimationII8WithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
     with SugarPortrayal 
-    with PollutionPortrayal {
+    with PollutionPortrayal 
+    with AgentPortrayal {
   def this() = this(new AnimationII8Sim(System.currentTimeMillis))
   type ET = AnimationII8Sim
 }

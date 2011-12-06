@@ -28,7 +28,6 @@ sealed abstract class Sex{
 case object Male extends Sex{ def isMale() = true }
 case object Female extends Sex{ def isMale() = false }
 
-
 trait SexRatio extends Sugarscape {
   type AT <: DifferentiatedSexes 
   
@@ -66,7 +65,8 @@ trait SexRuleS extends SexualReproduction
   }
   
   def reproduce(sugarscape: ET): Unit = if(isFertile) {
-    val nearbyLocations = immediateNeighborhood(sugarscape.random).
+    val nearbyLocations = 
+      immediateNeighborhood(sugarscape.random).
       map { sugarscape.translateLocation }
     
     def locationForChild(): Option[Int2D] = {
@@ -137,6 +137,3 @@ trait SexRuleSWithAncestry extends Agent with SexRuleS with Ancestry {
   }
 }
 
-trait MonogomousPairBonding extends SexualReproduction {
-  
-}

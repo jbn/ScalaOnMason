@@ -165,9 +165,24 @@ trait SugarConsumption extends Agent {
 /** 
  * Makes the agent move according to the Rule M. 
  */
-trait MovementRuleM { self: SugarConsumption =>
+trait MovementRuleM extends SugarConsumption { 
   def identifyBestLocation(sugarscape: ET) = {
     mostDesirableSugarLocation(sugarscape)
+  }
+}
+
+trait MeanBasalSugarMetabolism extends Sugarscape {
+  type AT <: SugarConsumption 
+  
+  /**
+   * The mean vision of al
+   */
+  def getMeanBasalSugarMetabolism(): Double = {
+    if(livingAgents.length == 0){
+      0.0
+    } else {
+      livingAgents.map(_.basalSugarMetabolism).sum / livingAgents.length
+    }
   }
 }
 

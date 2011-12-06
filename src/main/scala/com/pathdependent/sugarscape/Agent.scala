@@ -15,6 +15,9 @@ import scala.reflect.BooleanBeanProperty
 import sim.engine.{Schedule, SimState, Steppable}
 import sim.util.Int2D
 import ec.util.MersenneTwisterFast
+import sim.portrayal.grid.{ObjectGridPortrayal2D}
+import sim.portrayal.simple.{OvalPortrayal2D}
+import java.awt.Color
 
 import com.pathdependent.mason.ext.Helpers.shuffle
 
@@ -121,12 +124,14 @@ abstract class Agent extends Steppable {
   def step(uglyGenericState: SimState){
     val sugarscape = uglyGenericState.asInstanceOf[ET]
     
-    updateAutonomicState(sugarscape)
-    
     identifyBestLocation(sugarscape).foreach{ 
       sugarscape.moveAgent(location, _) 
     }
+    
+    // XXX: This is a problem. Interact before update Autonomic...?
     interact(sugarscape)
+
+    updateAutonomicState(sugarscape)
       
     if(hasDied) { 
       isDead = true
@@ -172,3 +177,33 @@ abstract class Agent extends Steppable {
   }
 }
 
+
+
+/**
+ * Implements the visualization of the agent as a yellow dot.
+ */
+trait AgentPortrayal extends SugarscapeWithUI {
+  val agentsPortrayal = new ObjectGridPortrayal2D() 
+
+  /**
+   * Sets up the sugarPortrayal.
+   */
+  override def setupPortrayal(sugarscape: ST) {
+    super.setupPortrayal(sugarscape)
+
+    agentsPortrayal.setPortrayalForNonNull(
+      new OvalPortrayal2D(Color.yellow, 0.2)
+    )
+  
+    agentsPortrayal.setField(sugarscape.agents)
+  }
+  
+  /** 
+   * Attaches the sugarPortrayal.
+   */
+  override def setupDisplay(display: sim.display.Display2D) {
+    super.setupDisplay(display)
+    
+    display.attach(agentsPortrayal, "The Agents")
+  }
+}

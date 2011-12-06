@@ -16,6 +16,8 @@ import sim.util.Int2D
 trait Inheritance extends Sugarscape {
   type AT <: SugarConsumption with Ancestry
   
+  var inheritanceTransferLoss: Double
+  
   override def reap(location: Int2D) { 
     val deadAgent = agentAt(location)
     
@@ -26,7 +28,8 @@ trait Inheritance extends Sugarscape {
       if(n > 0) {
         val amount = deadAgent.accumulatedSugar / n
         livingChildren.foreach{ child => 
-          child.asInstanceOf[AT].accumulatedSugar += amount        
+          child.asInstanceOf[AT].accumulatedSugar += 
+            amount * (1.0 - inheritanceTransferLoss)
         }
       }
     }

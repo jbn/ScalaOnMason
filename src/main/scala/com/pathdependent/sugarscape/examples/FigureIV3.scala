@@ -16,54 +16,62 @@ import scala.reflect.{BeanProperty}
 import sim.engine.{SimState}
 import sim.util.Int2D
 
-class AnimationII1Agent(
+class FigureIV3Agent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
-  @BeanProperty val sugarEndowment: Double
+  @BeanProperty val sugarEndowment: Double,
+  @BeanProperty val basalSpiceMetabolism: Double,
+  @BeanProperty val spiceEndowment: Double,
+  @BeanProperty val sex: Sex
 ) extends Agent
-    with SugarConsumption 
-      with MovementRuleM 
+    with MultiCommodityMovementRule with TradeRuleT {
+  type ET = FigureIV3Sim
+}
   
-class AnimationII1Sim(seed: Long) 
+class FigureIV3Sim(seed: Long) 
   extends Sugarscape(seed) 
-    with SugarResources with TwoSugarMountains{
+    with SugarAndSpiceMountains 
+    with TradeRecorder {
   def this() = this(System.currentTimeMillis())
     
-  type AT = AnimationII1Agent
+  type AT = FigureIV3Agent
   
+  width = 51
+  height = 51
   @BeanProperty var minDepthOfVision = 1
   @BeanProperty var maxDepthOfVision = 6
     
-  def generateAgent(): AnimationII1Agent = {
+  def generateAgent(): FigureIV3Agent = {
     val basalSugarMetabolism = 1 + random.nextInt(6)
-    new AnimationII1Agent(
+    val basalSpiceMetabolism = 1 + random.nextInt(6)
+    val agent = new FigureIV3Agent(
       depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
       basalSugarMetabolism = basalSugarMetabolism,
-      sugarEndowment = basalSugarMetabolism
+      sugarEndowment = 25 + random.nextInt(26),
+      basalSpiceMetabolism = basalSpiceMetabolism,
+      spiceEndowment = 25 + random.nextInt(26),
+      if(random.nextBoolean(0.5)) Male else Female
     )
+    agent
   }
   
-  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
-    resource.capacityGrowback()
-  }
-  
-  override def toString = AnimationII1WithUI.getName()
+  override def toString = FigureIV3WithUI.getName()
 }
   
-class AnimationII1WithUI(
+class FigureIV3WithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
-    with SugarPortrayal with AgentPortrayal {
-  def this() = this(new AnimationII1Sim(System.currentTimeMillis))
-  type ET = AnimationII1Sim
+    with SugarAndSpicePortrayal with AgentPortrayal {
+  def this() = this(new FigureIV3Sim(System.currentTimeMillis))
+  type ET = FigureIV3Sim
 }
   
-object AnimationII1WithUI {
+object FigureIV3WithUI {
   def main(args: Array[String]) {
-    (new AnimationII1WithUI()).createController() 
+    (new FigureIV3WithUI()).createController() 
   }
     
-  def getName(): String = "SugarScape AnimationII1"
+  def getName(): String = "SugarScape FigureIV3"
     
   def getInfo(): Object = (
     <html>

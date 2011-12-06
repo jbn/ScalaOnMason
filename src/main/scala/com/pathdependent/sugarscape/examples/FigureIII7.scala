@@ -75,23 +75,26 @@ class FigureIII7Sim(seed: Long)
   type AT = FigureIII7Agent
   
   initialAgentDensity = 400.0 / (width * height)
-  
+
   @BeanProperty var minDepthOfVision = 1
   @BeanProperty var maxDepthOfVision = 6
   @BeanProperty var shiftTerminalFertility = 0
   def domShiftTerminalFertility = new Interval(-25, 0)
+  
+  @BeanProperty var inheritanceTransferLoss = 0.0
+  def domInheritanceTransferLoss = new Interval(0.0,1.0)
   
   def getSugarWealth(): Double = {
     livingAgents.map { _.accumulatedSugar }.sum
   }
   
   def generateAgent(): FigureIII7Agent = {
-    val basalSugarMetabolism = 3 + random.nextInt(6)
+    val basalSugarMetabolism = 1 + random.nextInt(4) // p.61.
     val sex = if(random.nextBoolean) Male else Female
     new FigureIII7Agent(
       depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
       basalSugarMetabolism = basalSugarMetabolism,
-      sugarEndowment = 10 + random.nextInt(51),
+      sugarEndowment = 50 + random.nextInt(51),
       sex = sex,
       onsetAgeOfFertility = 12 + random.nextInt(4),
       terminalAgeOfFertility = shiftTerminalFertility +
@@ -111,7 +114,7 @@ class FigureIII7Sim(seed: Long)
 class FigureIII7WithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
-    with SugarPortrayal {
+    with SugarPortrayal with AgentPortrayal {
   def this() = this(new FigureIII7Sim(System.currentTimeMillis))
   type ET = FigureIII7Sim
 }

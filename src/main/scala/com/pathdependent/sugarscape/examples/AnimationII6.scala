@@ -68,7 +68,8 @@ class AnimationII6Sim(seed: Long)
 class AnimationII6WithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
-    with SugarPortrayal {
+    with SugarPortrayal 
+    with AgentPortrayal {
   def this() = this(new AnimationII6Sim(System.currentTimeMillis))
   type ET = AnimationII6Sim
 }
