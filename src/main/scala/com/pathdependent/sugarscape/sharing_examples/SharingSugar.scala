@@ -7,7 +7,7 @@
          Copyright John Bjorn Nelson <jbn@pathdependent.com>, 2011.
 
 */
-package com.pathdependent.sugarscape.examples
+package com.pathdependent.sugarscape.sharing_examples
 
 import com.pathdependent.sugarscape._
 
@@ -20,10 +20,7 @@ import ec.util.MersenneTwisterFast
 import com.pathdependent.mason.ext.PBM
 import com.pathdependent.mason.ext.Helpers.{makeSteppable}
 
-
-
-
-class SingleGroupSugarSharingAgent(
+class SugarSharingAgent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
   @BeanProperty val sugarEndowment: Double,
@@ -34,13 +31,13 @@ class SingleGroupSugarSharingAgent(
   @BeanProperty val ageOfExpiration: Int,
   @BeanProperty val groupIdentity: Int,
   @BeanProperty val sugarSharingGenerosity: Double,
-  @BeanProperty val fairnessEnforced: Boolean
+  @BeanProperty val fairnessEnforced: Boolean = true
 ) extends Agent
     with SugarConsumption with MovementRuleM 
     with SexRuleSWithAncestry
     with StaticGroupIdentity 
     with SugarSharing {
-  type AT = SingleGroupSugarSharingAgent
+  type AT = SugarSharingAgent
 
   def spawnChild(rng: MersenneTwisterFast, partner: AT): AT = {
     // group identity is defined by the mother
@@ -52,9 +49,9 @@ class SingleGroupSugarSharingAgent(
     val childSex = if(rng.nextBoolean) Male else Female
     def randomParent() = if(rng.nextBoolean) this else partner
     
-    val mutatedGenerosity = m.sugarSharingGenerosity + rng.nextDouble / 100.0 - 0.005
+    val mutatedGenerosity = m.sugarSharingGenerosity //+ rng.nextDouble / 100.0 - 0.01
     
-    new SingleGroupSugarSharingAgent(
+    new SugarSharingAgent(
       depthOfVision = randomParent.depthOfVision,
       basalSugarMetabolism = randomParent.basalSugarMetabolism,
       sugarEndowment = endowment,
@@ -67,31 +64,55 @@ class SingleGroupSugarSharingAgent(
       initialAge = 0,
       ageOfExpiration = randomParent.ageOfExpiration,
       groupIdentity = m.groupIdentity,
-      sugarSharingGenerosity = (mutatedGenerosity max 0.0) min 1.0,
-      fairnessEnforced = randomParent.fairnessEnforced
+      sugarSharingGenerosity = mutatedGenerosity max 1.0 min 0.0
     )
   }
 }
 
-
+trait GroupStatistics extends Sugarscape {
+  type AT <: SugarSharingAgent
+  /**
+   * Initializes the atmospheric pollution and schedules dissipation.
+   */
+  override def fieldInitializerChain() {
+    super.fieldInitializerChain()
+    
+    def stats(members: collection.mutable.ListBuffer[AT]) = {
+      (
+        members.length,
+        members.map(_.depthOfVision.toDouble).sum / members.length,
+        members.map(_.basalSugarMetabolism).sum / members.length,
+        members.map(_.accumulatedSugar).sum
+      )
+    }
+    
+    schedule.scheduleRepeating(
+      1.0, Sugarscape.Ordering.Statistics,
+      makeSteppable[SugarSharingSim] { simulation =>
+        val (groupOne, groupTwo) = livingAgents.partition(_.groupIdentity == 0)     
+        println(stats(groupOne))
+        println(stats(groupTwo))
+      }
+    )
+  }
+}
   
 /**
  * I was unable to replicate the observed BZWave unless I the sugar
  * growback was severely retarded. I also think I probably need to turn off
  * the terroidal landscape, but this gives you nice "waves" at least.
  */
-class SingleGroupSugarSharingSim(seed: Long) 
+class SugarSharingSim(seed: Long) 
   extends Sugarscape(seed) 
     with SugarResources with TwoSugarMountains
     with PortionMale
     with SnippedInheritance
     with MeanBasalSugarMetabolism
-    with MeanSugarSharingGenerosity
-    with PortionEnforcingFairness
-    with PortionFertile {
+    with GroupOneRelativeDominance
+    with GroupStatistics {
   def this() = this(System.currentTimeMillis())
     
-  type AT = SingleGroupSugarSharingAgent
+  type AT = SugarSharingAgent
   
   initialAgentDensity = 400.0 / (width * height)
   
@@ -99,7 +120,7 @@ class SingleGroupSugarSharingSim(seed: Long)
   @BeanProperty var maxDepthOfVision = 6
 
   @BeanProperty var inheritanceTransferLoss = 0.0
-  def domInheritanceTransferLoss = new Interval(0.0, 1.0)
+  def domInheritanceTransferLoss = new Interval(0.0,1.0)
 
   @BeanProperty var shiftTerminalFertility = 0
   def domShiftTerminalFertility = new Interval(-25, 0)
@@ -108,12 +129,12 @@ class SingleGroupSugarSharingSim(seed: Long)
     livingAgents.map { _.accumulatedSugar }.sum
   }
   
-  def generateAgent(): SingleGroupSugarSharingAgent = {
-    val basalSugarMetabolism = 1// + random.nextInt(4) // p.61.
+  def generateAgent(): SugarSharingAgent = {
+    val basalSugarMetabolism = 1 + random.nextInt(4) // p.61.
     val sex = if(random.nextBoolean) Male else Female
     val groupID = random.nextInt(2)
-    new SingleGroupSugarSharingAgent(
-      depthOfVision = 6, // minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
+    new SugarSharingAgent(
+      depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
       basalSugarMetabolism = basalSugarMetabolism,
       sugarEndowment = 50 + random.nextInt(51),
       sex = sex,
@@ -122,32 +143,38 @@ class SingleGroupSugarSharingSim(seed: Long)
         40 + random.nextInt(11) + (if(sex == Male) 10 else 0),
       initialAge = random.nextInt(40),
       ageOfExpiration = 60 + random.nextInt(41),
-      groupIdentity = 1,
-      sugarSharingGenerosity = random.nextDouble,
-      fairnessEnforced = random.nextBoolean
+      groupIdentity = groupID,
+      sugarSharingGenerosity = if(groupID == 1) 1.0 else 0.0
     )
   }
   
   def getAverageEndowment(): Double = {
     livingAgents.map(_.sugarEndowment).sum / livingAgents.length
   }
-  override def toString = SingleGroupSugarSharingWithUI.getName()
+  
+  @BeanProperty var durationOfSugarSeason = 50
+  @BeanProperty var winterSugarGrowbackRate = 1.0 / 8.0
+  def domWinterSugarGrowbackRate() = new Interval(0.0, 1.0)
+  @BeanProperty var summerSugarGrowbackRate = 1.0
+  def domSummerSugarGrowbackRate() = new Interval(0.0, 1.0)
+  
+  override def toString = SugarSharingWithUI.getName()
 }
   
-class SingleGroupSugarSharingWithUI(
+class SugarSharingWithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
     with SugarPortrayal with AgentPortrayal {
-  def this() = this(new SingleGroupSugarSharingSim(System.currentTimeMillis))
-  type ET = SingleGroupSugarSharingSim
+  def this() = this(new SugarSharingSim(System.currentTimeMillis))
+  type ET = SugarSharingSim
 }
   
-object SingleGroupSugarSharingWithUI {
+object SugarSharingWithUI {
   def main(args: Array[String]) {
-    (new SingleGroupSugarSharingWithUI()).createController() 
+    (new SugarSharingWithUI()).createController() 
   }
     
-  def getName(): String = "SugarScape SingleGroupSugarSharing"
+  def getName(): String = "SugarScape SugarSharing"
     
   def getInfo(): Object = (
     <html>

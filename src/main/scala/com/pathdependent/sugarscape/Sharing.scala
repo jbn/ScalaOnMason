@@ -21,7 +21,6 @@ import com.pathdependent.mason.ext.PBM
 import com.pathdependent.mason.ext.Helpers.{makeSteppable}
 
 
-
 trait SugarSharing extends SugarConsumption with GroupIdentity {
   type AT <: SugarSharing
   /**

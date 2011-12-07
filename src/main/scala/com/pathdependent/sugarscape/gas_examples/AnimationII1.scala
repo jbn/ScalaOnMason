@@ -7,7 +7,7 @@
          Copyright John Bjorn Nelson <jbn@pathdependent.com>, 2011.
 
 */
-package com.pathdependent.sugarscape.examples
+package com.pathdependent.sugarscape.gas_examples
 
 import com.pathdependent.sugarscape._
 
@@ -16,64 +16,54 @@ import scala.reflect.{BeanProperty}
 import sim.engine.{SimState}
 import sim.util.Int2D
 
-class AnimationIV1Agent(
+class AnimationII1Agent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
-  @BeanProperty val sugarEndowment: Double,
-  @BeanProperty val basalSpiceMetabolism: Double,
-  @BeanProperty val spiceEndowment: Double,
-  @BeanProperty val sex: Sex
+  @BeanProperty val sugarEndowment: Double
 ) extends Agent
-    with MultiCommodityMovementRule {
-  type ET = AnimationIV1Sim
-  var pollutionGeneratedBySugarExtraction = 1.0
-}
+    with SugarConsumption 
+      with MovementRuleM 
   
-class AnimationIV1Sim(seed: Long) 
+class AnimationII1Sim(seed: Long) 
   extends Sugarscape(seed) 
-    with SugarResources
-    with SpiceResources 
-      with SugarAndSpiceMountains {
+    with SugarResources with TwoSugarMountains{
   def this() = this(System.currentTimeMillis())
     
-  type AT = AnimationIV1Agent
+  type AT = AnimationII1Agent
   
   @BeanProperty var minDepthOfVision = 1
   @BeanProperty var maxDepthOfVision = 6
-  @BeanProperty var diffusionInterval = 1
-  @BeanProperty var pollutionGeneratedBySugarExtraction = 1.0
     
-  def generateAgent(): AnimationIV1Agent = {
+  def generateAgent(): AnimationII1Agent = {
     val basalSugarMetabolism = 1 + random.nextInt(6)
-    val basalSpiceMetabolism = 1 + random.nextInt(6)
-    val agent = new AnimationIV1Agent(
+    new AnimationII1Agent(
       depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
       basalSugarMetabolism = basalSugarMetabolism,
-      sugarEndowment = basalSugarMetabolism,
-      basalSpiceMetabolism = basalSpiceMetabolism,
-      spiceEndowment = basalSpiceMetabolism,
-      if(random.nextBoolean(0.5)) Male else Female
+      sugarEndowment = basalSugarMetabolism
     )
-    agent
   }
   
-  override def toString = AnimationIV1WithUI.getName()
+  override def sugarGrowbackRule(location: Int2D, resource: Resource) {
+    resource.capacityGrowback()
+  }
+  
+  override def toString = AnimationII1WithUI.getName()
 }
   
-class AnimationIV1WithUI(
+class AnimationII1WithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
-    with SugarAndSpicePortrayal with AgentPortrayal {
-  def this() = this(new AnimationIV1Sim(System.currentTimeMillis))
-  type ET = AnimationIV1Sim
+    with SugarPortrayal with AgentPortrayal {
+  def this() = this(new AnimationII1Sim(System.currentTimeMillis))
+  type ET = AnimationII1Sim
 }
   
-object AnimationIV1WithUI {
+object AnimationII1WithUI {
   def main(args: Array[String]) {
-    (new AnimationIV1WithUI()).createController() 
+    (new AnimationII1WithUI()).createController() 
   }
     
-  def getName(): String = "SugarScape AnimationIV1"
+  def getName(): String = "SugarScape AnimationII1"
     
   def getInfo(): Object = (
     <html>

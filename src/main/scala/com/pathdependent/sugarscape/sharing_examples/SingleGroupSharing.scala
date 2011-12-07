@@ -7,7 +7,7 @@
          Copyright John Bjorn Nelson <jbn@pathdependent.com>, 2011.
 
 */
-package com.pathdependent.sugarscape.examples
+package com.pathdependent.sugarscape.sharing_examples
 
 import com.pathdependent.sugarscape._
 
@@ -18,8 +18,12 @@ import sim.util.{Int2D, Interval}
 import ec.util.MersenneTwisterFast
 
 import com.pathdependent.mason.ext.PBM
+import com.pathdependent.mason.ext.Helpers.{makeSteppable}
 
-class AnimationIII1Agent(
+
+
+
+class SingleGroupSugarSharingAgent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
   @BeanProperty val sugarEndowment: Double,
@@ -27,23 +31,30 @@ class AnimationIII1Agent(
   @BeanProperty val onsetAgeOfFertility: Int,
   @BeanProperty val terminalAgeOfFertility: Int,
   @BeanProperty val initialAge: Int,
-  @BeanProperty val ageOfExpiration: Int
+  @BeanProperty val ageOfExpiration: Int,
+  @BeanProperty val groupIdentity: Int,
+  @BeanProperty val sugarSharingGenerosity: Double,
+  @BeanProperty val fairnessEnforced: Boolean
 ) extends Agent
-    with SugarConsumption 
-      with MovementRuleM 
-      with SexRuleS {
-  type AT = AnimationIII1Agent
-  
+    with SugarConsumption with MovementRuleM 
+    with SexRuleSWithAncestry
+    with StaticGroupIdentity 
+    with SugarSharing {
+  type AT = SingleGroupSugarSharingAgent
+
   def spawnChild(rng: MersenneTwisterFast, partner: AT): AT = {
+    // group identity is defined by the mother
+    val m = if(sex == Female) this else partner
     val endowment = 0.5 * this.sugarEndowment + 0.5 * partner.sugarEndowment
     accumulatedSugar -= 0.5 * sugarEndowment
     partner.accumulatedSugar -= 0.5 * partner.sugarEndowment
     
     val childSex = if(rng.nextBoolean) Male else Female
-    
     def randomParent() = if(rng.nextBoolean) this else partner
     
-    new AnimationIII1Agent(
+    val mutatedGenerosity = m.sugarSharingGenerosity + rng.nextDouble / 100.0 - 0.005
+    
+    new SingleGroupSugarSharingAgent(
       depthOfVision = randomParent.depthOfVision,
       basalSugarMetabolism = randomParent.basalSugarMetabolism,
       sugarEndowment = endowment,
@@ -54,69 +65,89 @@ class AnimationIII1Agent(
         40 + rng.nextInt(11) + (if(childSex == Male) 10 else 0),
       // end Notice
       initialAge = 0,
-      ageOfExpiration = randomParent.ageOfExpiration
+      ageOfExpiration = randomParent.ageOfExpiration,
+      groupIdentity = m.groupIdentity,
+      sugarSharingGenerosity = (mutatedGenerosity max 0.0) min 1.0,
+      fairnessEnforced = randomParent.fairnessEnforced
     )
   }
 }
+
+
   
 /**
  * I was unable to replicate the observed BZWave unless I the sugar
  * growback was severely retarded. I also think I probably need to turn off
  * the terroidal landscape, but this gives you nice "waves" at least.
  */
-class AnimationIII1Sim(seed: Long) 
+class SingleGroupSugarSharingSim(seed: Long) 
   extends Sugarscape(seed) 
     with SugarResources with TwoSugarMountains
     with PortionMale
-    with MeanBasalSugarMetabolism {
+    with SnippedInheritance
+    with MeanBasalSugarMetabolism
+    with MeanSugarSharingGenerosity
+    with PortionEnforcingFairness
+    with PortionFertile {
   def this() = this(System.currentTimeMillis())
     
-  type AT = AnimationIII1Agent
+  type AT = SingleGroupSugarSharingAgent
   
   initialAgentDensity = 400.0 / (width * height)
   
   @BeanProperty var minDepthOfVision = 1
   @BeanProperty var maxDepthOfVision = 6
+
+  @BeanProperty var inheritanceTransferLoss = 0.0
+  def domInheritanceTransferLoss = new Interval(0.0, 1.0)
+
   @BeanProperty var shiftTerminalFertility = 0
   def domShiftTerminalFertility = new Interval(-25, 0)
   
-  def generateAgent(): AnimationIII1Agent = {
-    val basalSugarMetabolism = 1 + random.nextInt(6)
+  def getSugarWealth(): Double = {
+    livingAgents.map { _.accumulatedSugar }.sum
+  }
+  
+  def generateAgent(): SingleGroupSugarSharingAgent = {
+    val basalSugarMetabolism = 1// + random.nextInt(4) // p.61.
     val sex = if(random.nextBoolean) Male else Female
-    new AnimationIII1Agent(
-      depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
+    val groupID = random.nextInt(2)
+    new SingleGroupSugarSharingAgent(
+      depthOfVision = 6, // minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
       basalSugarMetabolism = basalSugarMetabolism,
       sugarEndowment = 50 + random.nextInt(51),
       sex = sex,
       onsetAgeOfFertility = 12 + random.nextInt(4),
       terminalAgeOfFertility = shiftTerminalFertility +
         40 + random.nextInt(11) + (if(sex == Male) 10 else 0),
-      initialAge = random.nextInt(25),
-      ageOfExpiration = 60 + random.nextInt(41)
+      initialAge = random.nextInt(40),
+      ageOfExpiration = 60 + random.nextInt(41),
+      groupIdentity = 1,
+      sugarSharingGenerosity = random.nextDouble,
+      fairnessEnforced = random.nextBoolean
     )
   }
   
   def getAverageEndowment(): Double = {
     livingAgents.map(_.sugarEndowment).sum / livingAgents.length
   }
-  
-  override def toString = AnimationIII1WithUI.getName()
+  override def toString = SingleGroupSugarSharingWithUI.getName()
 }
   
-class AnimationIII1WithUI(
+class SingleGroupSugarSharingWithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
     with SugarPortrayal with AgentPortrayal {
-  def this() = this(new AnimationIII1Sim(System.currentTimeMillis))
-  type ET = AnimationIII1Sim
+  def this() = this(new SingleGroupSugarSharingSim(System.currentTimeMillis))
+  type ET = SingleGroupSugarSharingSim
 }
   
-object AnimationIII1WithUI {
+object SingleGroupSugarSharingWithUI {
   def main(args: Array[String]) {
-    (new AnimationIII1WithUI()).createController() 
+    (new SingleGroupSugarSharingWithUI()).createController() 
   }
     
-  def getName(): String = "SugarScape AnimationIII1"
+  def getName(): String = "SugarScape SingleGroupSugarSharing"
     
   def getInfo(): Object = (
     <html>

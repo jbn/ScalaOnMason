@@ -7,7 +7,7 @@
          Copyright John Bjorn Nelson <jbn@pathdependent.com>, 2011.
 
 */
-package com.pathdependent.sugarscape.examples
+package com.pathdependent.sugarscape.gas_examples
 
 import com.pathdependent.sugarscape._
 
@@ -16,70 +16,64 @@ import scala.reflect.{BeanProperty}
 import sim.engine.{SimState}
 import sim.util.Int2D
 
-import com.pathdependent.mason.ext.BinaryString
-
-class AnimationIII6Agent(
+class AnimationIV1Agent(
   @BeanProperty val depthOfVision: Int,
   @BeanProperty val basalSugarMetabolism: Double, 
   @BeanProperty val sugarEndowment: Double,
-  @BeanProperty val initialAge: Int,
-  @BeanProperty val ageOfExpiration: Int,
-  @BeanProperty val initialCulturalTags: BinaryString
+  @BeanProperty val basalSpiceMetabolism: Double,
+  @BeanProperty val spiceEndowment: Double,
+  @BeanProperty val sex: Sex
 ) extends Agent
-    with SugarConsumption 
-      with MovementRuleM 
-      with RuleK
-      
+    with MultiCommodityMovementRule {
+  type ET = AnimationIV1Sim
+  var pollutionGeneratedBySugarExtraction = 1.0
+}
   
-class AnimationIII6Sim(seed: Long) 
+class AnimationIV1Sim(seed: Long) 
   extends Sugarscape(seed) 
-    with SugarResources with TwoSugarMountains 
-    with CulturalTagsDistribution
-    with GroupOneRelativeDominance {
+    with SugarResources
+    with SpiceResources 
+      with SugarAndSpiceMountains {
   def this() = this(System.currentTimeMillis())
     
-  type AT = AnimationIII6Agent
-  
-  initialAgentDensity = 250.0 / (width * height)
+  type AT = AnimationIV1Agent
   
   @BeanProperty var minDepthOfVision = 1
   @BeanProperty var maxDepthOfVision = 6
-  @BeanProperty var numberOfCulturalTags = 11
-  
+  @BeanProperty var diffusionInterval = 1
+  @BeanProperty var pollutionGeneratedBySugarExtraction = 1.0
     
-  def generateAgent(): AnimationIII6Agent = {
-    new AnimationIII6Agent(
+  def generateAgent(): AnimationIV1Agent = {
+    val basalSugarMetabolism = 1 + random.nextInt(6)
+    val basalSpiceMetabolism = 1 + random.nextInt(6)
+    val agent = new AnimationIV1Agent(
       depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
-      basalSugarMetabolism = 1 + random.nextInt(6),
-      sugarEndowment = 5 + random.nextInt(21),
-      initialAge = 0,
-      ageOfExpiration = 60 + random.nextInt(41),
-      initialCulturalTags = BinaryString.generateRandom(
-        random, numberOfCulturalTags
-      )
+      basalSugarMetabolism = basalSugarMetabolism,
+      sugarEndowment = basalSugarMetabolism,
+      basalSpiceMetabolism = basalSpiceMetabolism,
+      spiceEndowment = basalSpiceMetabolism,
+      if(random.nextBoolean(0.5)) Male else Female
     )
+    agent
   }
   
-  override def toString = AnimationIII6WithUI.getName()
+  override def toString = AnimationIV1WithUI.getName()
 }
   
-class AnimationIII6WithUI(
+class AnimationIV1WithUI(
   rawState: SimState
 ) extends SugarscapeWithUI(rawState) 
-    with SugarPortrayal with AgentPortrayal {
-  def this() = this(new AnimationIII6Sim(System.currentTimeMillis))
-  type ET = AnimationIII6Sim
-  
+    with SugarAndSpicePortrayal with AgentPortrayal {
+  def this() = this(new AnimationIV1Sim(System.currentTimeMillis))
+  type ET = AnimationIV1Sim
 }
   
-object AnimationIII6WithUI {
+object AnimationIV1WithUI {
   def main(args: Array[String]) {
-    (new AnimationIII6WithUI()).createController() 
+    (new AnimationIV1WithUI()).createController() 
   }
     
-  def getName(): String = "SugarScape AnimationIII6"
-  
-  
+  def getName(): String = "SugarScape AnimationIV1"
     
   def getInfo(): Object = (
     <html>
