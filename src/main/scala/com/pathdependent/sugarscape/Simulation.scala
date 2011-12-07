@@ -154,16 +154,6 @@ abstract class Sugarscape(randomSeed: Long) extends SimState(randomSeed) {
     agent.location = location
   }
  
-  /**
-   * The mean vision of all living agents. 
-   */
-  def getMeanAgentDepthOfVision(): Double = {
-    if(livingAgents.length == 0){
-      0.0
-    } else {
-      livingAgents.map(_.depthOfVision).sum / livingAgents.length.toDouble
-    }
-  }
   
   /**
    * @param location unadjusted location.

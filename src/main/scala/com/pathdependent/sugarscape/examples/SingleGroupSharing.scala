@@ -83,11 +83,12 @@ class SingleGroupSugarSharingAgent(
 class SingleGroupSugarSharingSim(seed: Long) 
   extends Sugarscape(seed) 
     with SugarResources with TwoSugarMountains
-    with SexRatio 
+    with PortionMale
     with SnippedInheritance
     with MeanBasalSugarMetabolism
-    with GroupOneRelativeDominance
-    with MeanSugarSharingGenerosity {
+    with MeanSugarSharingGenerosity
+    with PortionEnforcingFairness
+    with PortionFertile {
   def this() = this(System.currentTimeMillis())
     
   type AT = SingleGroupSugarSharingAgent
@@ -108,11 +109,11 @@ class SingleGroupSugarSharingSim(seed: Long)
   }
   
   def generateAgent(): SingleGroupSugarSharingAgent = {
-    val basalSugarMetabolism = 1 + random.nextInt(4) // p.61.
+    val basalSugarMetabolism = 1// + random.nextInt(4) // p.61.
     val sex = if(random.nextBoolean) Male else Female
     val groupID = random.nextInt(2)
     new SingleGroupSugarSharingAgent(
-      depthOfVision = minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
+      depthOfVision = 6, // minDepthOfVision + random.nextInt(maxDepthOfVision - minDepthOfVision + 1),
       basalSugarMetabolism = basalSugarMetabolism,
       sugarEndowment = 50 + random.nextInt(51),
       sex = sex,

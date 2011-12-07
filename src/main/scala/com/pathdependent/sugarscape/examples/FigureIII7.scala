@@ -68,7 +68,7 @@ class FigureIII7Agent(
 class FigureIII7Sim(seed: Long) 
   extends Sugarscape(seed) 
     with SugarResources with TwoSugarMountains
-    with SexRatio 
+    with PortionMale
     with SnippedInheritance {
   def this() = this(System.currentTimeMillis())
     

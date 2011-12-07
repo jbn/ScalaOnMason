@@ -49,29 +49,4 @@ trait RuleK extends Culture {
   }
 }
 
-trait CulturalTagsDistribution extends Sugarscape {
-  type AT <: Culture 
 
-
-  def getCulturalTagsDistribution(): Array[Int] = {
-    val numberLiving = livingAgents.length
-    
-    if(numberLiving > 0) {
-      val n = livingAgents.head.culturalTags.length
-      val tagCounts = new Array[Int](n)
-      val range = (0 until n)
-      livingAgents.foreach { agent => 
-        range.foreach { i => if(agent.culturalTags(i)) tagCounts(i) += 1 }
-      }
-      
-      val tagDistribution = new Array[Int](tagCounts.sum)
-      var i = 0
-      tagCounts.zipWithIndex.foreach { case (count, tag) =>
-        (1 to count).foreach { _ => tagDistribution(i) = tag + 1; i += 1 }
-      }
-      tagDistribution
-    } else {
-      new Array[Int](0)
-    }
-  }
-}

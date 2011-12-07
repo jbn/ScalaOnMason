@@ -7,7 +7,7 @@
          Copyright John Bjorn Nelson <jbn@pathdependent.com>, 2011.
 
 */
-package com.pathdependent.sugarscape.examples
+package com.pathdependent.sugarscape
 
 import com.pathdependent.sugarscape._
 
@@ -20,28 +20,7 @@ import ec.util.MersenneTwisterFast
 import com.pathdependent.mason.ext.PBM
 import com.pathdependent.mason.ext.Helpers.{makeSteppable}
 
-trait MeanSugarSharingGenerosity extends Sugarscape {
-  type AT <: SugarSharing
-  
-  /**
-   * The mean vision of al
-   */
-  def getMeanSugarSharingGenerosity(): Double = {
-    if(livingAgents.length == 0){
-      0.0
-    } else {
-      livingAgents.map(_.sugarSharingGenerosity).sum / livingAgents.length
-    }
-  }
-  
-  def getRatioOfFairnessEnforcedSharers(): Double = {
-    if(livingAgents.length == 0){
-      0.0
-    } else {
-      livingAgents.filter(_.fairnessEnforced).length.toDouble / livingAgents.length
-    }
-  }
-}
+
 
 trait SugarSharing extends SugarConsumption with GroupIdentity {
   type AT <: SugarSharing
@@ -61,6 +40,7 @@ trait SugarSharing extends SugarConsumption with GroupIdentity {
     val t1 = timeUntilStarvation(this)
     val t2 = timeUntilStarvation(partner)
 
+    /*
     // Only share with agents who have similar ideas on sharing.
     val fairnessCheck = 
       if(fairnessEnforced) (partner.sugarSharingGenerosity - 0.1) > sugarSharingGenerosity
@@ -70,6 +50,27 @@ trait SugarSharing extends SugarConsumption with GroupIdentity {
     // This is for sugarSharingGenerosity = 100%
     if(t1 > t2 && sugarSharingGenerosity > 0.0 && fairnessCheck) {
       val sharableSugar = accumulatedSugar * sugarSharingGenerosity
+      val guardedSugar = accumulatedSugar - sharableSugar
+        
+      val jointSugar = sharableSugar + partner.accumulatedSugar
+      val jointMetabolism = basalSugarMetabolism + partner.basalSugarMetabolism
+     
+      val nextSugar = basalSugarMetabolism / jointMetabolism * jointSugar + guardedSugar
+      val partnerNextSugar = partner.basalSugarMetabolism / jointMetabolism * jointSugar
+        
+      // Need to survive at least one step
+      if(nextSugar > basalSugarMetabolism && partnerNextSugar > partner.accumulatedSugar) { 
+        accumulatedSugar = nextSugar
+        partner.accumulatedSugar = partnerNextSugar
+
+      }
+    }*/
+    if(t1 > t2 && sugarSharingGenerosity > 0.0) {
+      val r = if(fairnessEnforced) {
+        sugarSharingGenerosity min partner.sugarSharingGenerosity
+      } else sugarSharingGenerosity
+      
+      val sharableSugar = accumulatedSugar * r
       val guardedSugar = accumulatedSugar - sharableSugar
         
       val jointSugar = sharableSugar + partner.accumulatedSugar

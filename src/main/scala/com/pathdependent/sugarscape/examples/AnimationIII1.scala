@@ -67,7 +67,7 @@ class AnimationIII1Agent(
 class AnimationIII1Sim(seed: Long) 
   extends Sugarscape(seed) 
     with SugarResources with TwoSugarMountains
-    with SexRatio 
+    with PortionMale
     with MeanBasalSugarMetabolism {
   def this() = this(System.currentTimeMillis())
     

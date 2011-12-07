@@ -28,13 +28,6 @@ sealed abstract class Sex{
 case object Male extends Sex{ def isMale() = true }
 case object Female extends Sex{ def isMale() = false }
 
-trait SexRatio extends Sugarscape {
-  type AT <: DifferentiatedSexes 
-  
-  def getSexRatio(): Double = {
-    livingAgents.count(_.sex.isMale).toDouble / livingAgents.length
-  }
-}
 // --------------------------------------
 
 trait SexualReproduction extends Agent {

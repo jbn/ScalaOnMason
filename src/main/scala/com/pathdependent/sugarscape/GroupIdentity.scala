@@ -23,23 +23,4 @@ trait StaticGroupIdentity extends GroupIdentity {
   val groupIdentity: Int
 }
 
-trait GroupOneRelativeDominance extends Sugarscape {
-  type AT <: GroupIdentity
-
-  def getPercentInGroupOne(): Double = {
-    val numberLiving = livingAgents.length
-    
-    if(numberLiving > 0) {
-      var numberInGroup1 = 0
-
-      livingAgents.foreach { 
-        agent => if(agent.groupIdentity == 1) numberInGroup1 += 1 
-      }
-
-      numberInGroup1.toDouble / numberLiving * 100.0
-    } else {
-      -1.0
-    }
-  }
-}
 

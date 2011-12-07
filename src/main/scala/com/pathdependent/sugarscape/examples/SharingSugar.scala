@@ -105,7 +105,7 @@ trait GroupStatistics extends Sugarscape {
 class SugarSharingSim(seed: Long) 
   extends Sugarscape(seed) 
     with SugarResources with TwoSugarMountains
-    with SexRatio 
+    with PortionMale
     with SnippedInheritance
     with MeanBasalSugarMetabolism
     with GroupOneRelativeDominance

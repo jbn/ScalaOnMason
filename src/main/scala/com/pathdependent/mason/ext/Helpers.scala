@@ -68,13 +68,19 @@ object Helpers {
       (implicit manifest: scala.reflect.Manifest[T]) {
     sim.engine.SimState.doLoop(manifest.erasure, args)
   }
-  
+ 
+  /**
+   * Compute the sum of a bag.
+   */ 
   def sum(bag: sim.util.IntBag): Int = {
     var accumulator = 0
     (0 until bag.numObjs).foreach{ accumulator += bag.get(_) }
     accumulator
   }
   
+  /**
+   * Compute the sum of a bag.
+   */ 
   def sum(bag: sim.util.DoubleBag): Double = {
     var accumulator = 0.0
     (0 until bag.numObjs).foreach{ accumulator += bag.get(_) }
